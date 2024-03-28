@@ -52,7 +52,7 @@ int main(void) {
     //desired interval = ( (Prescaler + 1) * (counter period + 1) )/HCLK
     //e.g. we want timer every 0.5 seconds: 0.5 = ( (49999+1)*(999+1) ) / 100*10^6
     //pulse=what duty cycle we want (50% duty cycle of 9V = 4.5V), usually ( (counter period+1)/2 ) + 1
-    //check global interrupt for that timer in NVIC
+    //check global interrupt for that timer in NVIC (PWM can emit without interrupt)
     //add this to start timer
     HAL_TIM_Base_Start_IT(&htim4);
     //for timers that output to external, MUST ADD PULSE and this:
