@@ -86,6 +86,22 @@ int main(void) {
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     HAL_TIM_Base_Start_IT(&htim5);
 
-    //Lab3.4 UART Interrupt
-    
+    //Lab3.4 UART Interrupt: check UART global interrupt in NVIC
+    /* USER CODE BEGIN 0 */
+    char buffer[10];
+
+    void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) //callbacks are declared outside main()
+    {
+        buffer[1] = '\0';
+        HAL_UART_Transmit(&huart2, buffer, 1, 100);
+
+        if (buffer[0] == '\r') {
+            HAL_UART_Transmit(&huart2, "\n", 1, 100);
+        }
+    }
+    while (1)
+    {
+        HAL_UART_Receive_IT(&huart2, buffer, 1);
+    }
+
 }
