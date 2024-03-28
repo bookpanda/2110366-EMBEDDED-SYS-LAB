@@ -18,7 +18,7 @@ int main(void) {
 
     //Lab 2.1 same as Lab 1
 
-    //Lab 2.2 external LED
+    //Lab 2.2 external LED (Do not connect both ends on same vertical line on breadboard, it won't work)
     //LED: bigger side = negative
     //PA5 is already configured to have GPIO_Output in ioc file
     //Say we want to use PA1, which corresponds to A1 on board, we have to set PA1 in ioc file to be GPIO_Output as well
