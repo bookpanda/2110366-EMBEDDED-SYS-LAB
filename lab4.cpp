@@ -17,6 +17,18 @@ int main(void) {
         }
     }
 
-    //Lab4.2
-    
+    //Lab4.2 adjust light from LDR
+    //ioc > Analog > ADC1 > check IN0, PA0 = ADC1_IN0
+    //LDR input:3.3v, output:GND,PA0
+    int ldrval = 0;
+    char buf[256];
+    while (1)
+    {
+        HAL_ADC_Start(&hadc1);
+        if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
+            ldrval = HAL_ADC_GetValue(&hadc1);
+        sprintf (buf, "%d\r\n" , ldrval);
+        HAL_UART_Transmit(&huart2, buf, strlen(buf), 1000);
+        HAL_Delay(100);
+    }
 }
