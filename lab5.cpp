@@ -45,5 +45,28 @@ int main(void) {
     }
 
     //Lab 5.3 2 I2Cs communicating
+    //I2C1 event, error interrupt + (optional: can change slave addr from 0, but have to shift 1 bits i.e. uint16_t slaveADDR = 0x12<<1;)
+    //GPIO > I2C > both I2C1_SDA, I2C1_SCL GPIO Pull-up
+    //I2C2 no need to customize, it is master
+    //I2C2 sends to I2C1 (wire SDA(PB9, PB7), SCL(PB6, PB10) to resistor to each other)
+    void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+    {
+        if(hi2c == &hi2c1) {
+            HAL_UART_Transmit(&huart2, "b", 1, 100);
+            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        }
+    }
+    char c;
+    while (1)
+    {
+        if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
+            HAL_UART_Transmit(&huart2, "a", 1, 100);
+    //		   HAL_I2C_Master_Transmit(&hi2c2, slaveADDR, "a", 1, 100);
+            HAL_I2C_Master_Transmit(&hi2c2, 0, "a", 1, 100);
+            HAL_Delay(50);
+            HAL_I2C_Slave_Receive_IT(&hi2c1, &c, 1);
+            while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
+        }
+    }
     
 }
