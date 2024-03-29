@@ -5,10 +5,8 @@
 - The GPIO_PIN_5 is LD2 LED (center of board)
     ```c
     while (1) {
-        /* USER CODE END WHILE */
         HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
         HAL_Delay(200);
-        /* USER CODE BEGIN 3 */
     }
     ```
 
