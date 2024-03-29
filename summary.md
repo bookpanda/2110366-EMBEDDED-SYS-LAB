@@ -1,60 +1,16 @@
 - Set key binds: settings > preferences > keys > content assist
 - How to look at port chart: outer=code name | inner=in-board name | e.g. PA5(code) corresponds to D13(inner)
 - Do not connect both ends on same vertical line on breadboard, it won't work
-# Lab 1
-- The GPIO_PIN_5 is LD2 LED (center of board)
-    ```c
-    while (1) {
-        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-        HAL_Delay(200);
-    }
-    ```
-
-# Lab 2.2 external LED 
 - LED: bigger side = negative
-- PA5 is already configured to have GPIO_Output in ioc file
 - Say we want to use PA1, which corresponds to A1 on board, we have to set PA1 in ioc file to be GPIO_Output as well
-    ```c
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
-    HAL_Delay(200);
-    ```
-
-# Lab 2.3 push button to toggle LED
-- C13 is linked to blue push button
-    ```c
-    if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	    HAL_Delay(50);
-		while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
-	}
-    ```
-
 # Lab 2.4 UART
 - Connectivity > USART2 aka USB, see Baud Rate = 115200 bits/s
-    ```c
-    Mac
     ls /dev/tty.* #search for port
     screen //port// 115200 #connect to port with buad rate
     screen -ls #list all active serial port
     screen -X -S //identifier// quit #quit that serial port
-
-    For Windows, device manager > COM port
-    open PuTTY, serial, hostname=COM3, speed=115200
-
-    char c[1];
-    while(1) {
-        if(HAL_UART_Receive(&huart2, c, 1, 100) == HAL_OK) {
-            HAL_UART_Transmit(&huart2, c, 1, 100);
-            if(c[0] == '\r') {
-		        HAL_UART_Transmit(&huart2, "\n", 1, 100);
-		    }
-        }
-    }
-    ```
-
 # Lab 2.5 UART on/off command to LED
 - PA6 is connected to green LED, set to GPIO_Output
-    ```c
     void uartPrint(const char* msg) {
     	HAL_UART_Transmit(&huart2, msg, strlen(msg), 100);
     }
@@ -70,13 +26,11 @@
         if(status == HAL_OK) {
             HAL_UART_Transmit(&huart2, uartInput, 1, 100);
             line[length++] = uartInput[0];
-
             if(length > 100) {
                 length = 0;
                 uartPrintln("\r\nLength limit exceeded, overwriting line!");
                 continue;
             }
-
             if(uartInput[0] == '\r') {
                 uartPrint("\n");
                 line[length] = '\0'; //mark end of line, or else it will scan old inputs
@@ -94,14 +48,11 @@
             }
         }
     }
-    ```
-
 # Lab 3.1 Interrupt
 1. ioc > System Core > GPIO > change the Pin with External Interrupt to rising edge (this sets the button C13 to generate interrupt)
 - GPIO > NVIC > check EXTI line interrupt
 2. we have to increase HAL_Delay() priority (HAL_Delay is an interrupt of SysTick, we need it to have higher priority than other interrupts)
 - System Core > NVIC > change Priority Group to 2-bits > change EXTI line Preemption Priority to 2
-    ```c
     int delays[] = {200, 1000, 5000};
     int idx = 0;
     void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -127,8 +78,6 @@
         if(state==1) HAL_UART_Transmit(&huart2, "1", 1, 100);
         if(state==2) HAL_UART_Transmit(&huart2, "2", 1, 100);
     }
-    ```
-
 # Lab 3.2 Timer
 1. if we want to output timer signal to external, select pin with timer e.g. B6 has TIM4_CH1
 - Timers > TIM4 > check internal clock, PWM Generation on channel 1, enable auto-reload
@@ -136,19 +85,15 @@
 - e.g. we want timer every 0.5 seconds: 0.5 = ( (49999+1) * (999+1) ) / 100*10^6
 - pulse=what duty cycle we want (50% duty cycle of 9V = 4.5V), usually ( (counter period+1)/2 ) + 1
 3. check global interrupt for that timer in NVIC (PWM can emit without interrupt)
-    ```c
     //add this to start timer
     HAL_TIM_Base_Start_IT(&htim4);
     //for timers that output to external, MUST ADD PULSE and this:
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-    ```
-
 # Lab 3.3 Timer
 - HCLK 100M
 - 500ms timer: 0.5 = ( (49999 + 1) * (999 + 1) )/HCLK
 - 490ms timer: 0.490 = ( (49999 + 1) * (980 + 1) )/HCLK
 - 1s timer: 1 = ( (49999 + 1) * (1999 + 1) )/HCLK
-    ```c
     int internalLEDCount = 0;
     int externalLEDCount = 0;
     void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) { //handles global interrupt from timers
@@ -169,11 +114,8 @@
     HAL_TIM_Base_Start_IT(&htim4);
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     HAL_TIM_Base_Start_IT(&htim5);
-    ```
-
 # Lab 3.4 UART Interrupt: check UART global interrupt in NVIC
 - Callbacks are declared outside main()
-    ```c
     char buffer[10];
     void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
         buffer[1] = '\0';
@@ -186,11 +128,8 @@
     while (1) {
         HAL_UART_Receive_IT(&huart2, buffer, 1); //it has _IT (non-blocking)
     }
-    ```
-
 # Lab 4.1 Timer increase brightness
 - 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M, PWM gen
-    ```c
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     while (1) {
         for(int i=0;i<100;i++) {
@@ -202,12 +141,9 @@
             HAL_Delay(10);
         }
     }
-    ```
-
 # Lab 4.2 Adjust light from LDR
 - ioc > Analog > ADC1 > check IN0, PA0 = ADC1_IN0
 - LDR input:3.3v, output:GND,PA0
-    ```c
     int ldrval = 0;
     char buf[256];
     while (1) {
@@ -218,11 +154,8 @@
         HAL_UART_Transmit(&huart2, buf, strlen(buf), 1000);
         HAL_Delay(100);
     }
-    ```
-
 # Lab 4.3 Control LED with LDR
 - create ADC1_IN0 and timer
-    ```c
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     int adcval = 0;
     char buf[256];
@@ -238,12 +171,9 @@
             HAL_UART_Transmit(&huart2, buf, strlen(buf), 1000);
         }
     }
-    ```
-
 # Lab 5.1 Two UARTs communicating
 - UART2's TX sends to UART1's RX (wire PA2(TX) to resistor to PA10(RX))
 - check UART1 global interrupt in NVIC
-    ```c
     void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
         if(huart == &huart1) {
             HAL_UART_Transmit(&huart2, "b", 1, 100);
@@ -259,12 +189,9 @@
             while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
         }
     }
-    ```
-
 # Lab 5.2 Two SPIs communicating
 - SPI2 Transmit Only Master, SPI3 Receive Only Slave + global interrupt
 - SPI2 sends to SPI3 (wire MOSI(PC3, PC12), CLK(PB12, PB10) to resistor to each other)
-    ```c
     void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
         if(hspi == &hspi3) {
             HAL_UART_Transmit(&huart2, "b", 1, 100);
@@ -280,14 +207,11 @@
             while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
         }
     }
-    ```
-
 # Lab 5.3 Two I2Cs communicating
-1. I2C1 event, error interrupt + (optional: can change slave addr from 0, but have to shift 1 bits i.e. uint16_t slaveADDR = 0x12<<1;)
+1. I2C1 event, error interrupt
 - GPIO > I2C > both I2C1_SDA, I2C1_SCL GPIO Pull-up
 2. I2C2 no need to customize, it is master
 3. I2C2 sends to I2C1 (wire SDA(PB9, PB7), SCL(PB6, PB10) to resistor to each other)
-    ```c
     void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c) {
         if(hi2c == &hi2c1) {
             HAL_UART_Transmit(&huart2, "b", 1, 100);
@@ -298,11 +222,9 @@
     while (1) {
         if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
             HAL_UART_Transmit(&huart2, "a", 1, 100);
-    //		   HAL_I2C_Master_Transmit(&hi2c2, slaveADDR, "a", 1, 100);
             HAL_I2C_Master_Transmit(&hi2c2, 0, "a", 1, 100);
             HAL_Delay(50);
             HAL_I2C_Slave_Receive_IT(&hi2c1, &c, 1); //must be _IT (interrupt)
             while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
         }
     }
-    ```
