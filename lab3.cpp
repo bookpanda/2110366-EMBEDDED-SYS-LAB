@@ -101,7 +101,7 @@ int main(void) {
     }
     while (1)
     {
-        HAL_UART_Receive_IT(&huart2, buffer, 1);
+        HAL_UART_Receive_IT(&huart2, buffer, 1);//it has _IT (non-blocking)
     }
 
 }

@@ -104,14 +104,14 @@ int main(void)
   while (1)
   {
 	  //5.1 HUART
-//	  if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
-//	               HAL_UART_Transmit(&huart1, "a", 1, 100);
-//	               HAL_Delay(50);
-//	               while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
-//	   }
-//	        if(HAL_UART_Receive(&huart1, c, 1, 100) == HAL_OK) {
-//	            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	           }
+	  if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
+	               HAL_UART_Transmit(&huart1, "a", 1, 100);
+	               HAL_Delay(50);
+	               while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
+	   }
+	        if(HAL_UART_Receive(&huart1, c, 1, 100) == HAL_OK) {
+	            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	           }
 
 
 	  //
