@@ -86,7 +86,7 @@ int main(void) {
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     HAL_TIM_Base_Start_IT(&htim5);
 
-    //Lab3.4 UART Interrupt: check UART global interrupt in NVIC
+    //Lab 3.4 UART Interrupt: check UART global interrupt in NVIC
     /* USER CODE BEGIN 0 */
     char buffer[10];
 

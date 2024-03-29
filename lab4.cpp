@@ -17,7 +17,7 @@ int main(void) {
         }
     }
 
-    //Lab4.2 adjust light from LDR
+    //Lab 4.2 adjust light from LDR
     //ioc > Analog > ADC1 > check IN0, PA0 = ADC1_IN0
     //LDR input:3.3v, output:GND,PA0
     int ldrval = 0;
@@ -32,7 +32,7 @@ int main(void) {
         HAL_Delay(100);
     }
 
-    //Lab4.3 control LED with LDR
+    //Lab 4.3 control LED with LDR
     //create ADC1_IN0 and timer
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     int adcval = 0;
