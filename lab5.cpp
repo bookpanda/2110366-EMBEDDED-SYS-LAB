@@ -68,5 +68,4 @@ int main(void) {
             while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
         }
     }
-    
 }
