@@ -98,10 +98,8 @@ int main(void) {
         if (buffer[0] == '\r') {
             HAL_UART_Transmit(&huart2, "\n", 1, 100);
         }
-    }
-    while (1)
-    {
         HAL_UART_Receive_IT(&huart2, buffer, 1);//it has _IT (non-blocking)
     }
-
+    HAL_UART_Receive_IT(&huart2, buffer, 1);
+    while (1) {}
 }

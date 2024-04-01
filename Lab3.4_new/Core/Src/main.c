@@ -66,6 +66,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if (buffer[0] == '\r') {
 		HAL_UART_Transmit(&huart2, "\n", 1, 100);
 	}
+  HAL_UART_Receive_IT(&huart2, buffer, 1);
 }
 /* USER CODE END 0 */
 
@@ -104,9 +105,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_UART_Receive_IT(&huart2, buffer, 1);
   while (1)
   {
-	  HAL_UART_Receive_IT(&huart2, buffer, 1);
+	  // HAL_UART_Receive_IT(&huart2, buffer, 1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

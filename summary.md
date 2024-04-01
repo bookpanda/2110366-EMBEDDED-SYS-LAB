@@ -35,7 +35,6 @@
                 uartPrint("\n");
                 line[length] = '\0'; //mark end of line, or else it will scan old inputs
                 length = 0;
-
                 if(!strcmp(line, "on\r")) {
                     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET);
                     uartPrintln("LED is ON");
@@ -90,10 +89,9 @@
     //for timers that output to external, MUST ADD PULSE and this:
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 # Lab 3.3 Timer
-- HCLK 100M
-- 500ms timer: 0.5 = ( (49999 + 1) * (999 + 1) )/HCLK
-- 490ms timer: 0.490 = ( (49999 + 1) * (980 + 1) )/HCLK
-- 1s timer: 1 = ( (49999 + 1) * (1999 + 1) )/HCLK
+- 500ms timer: 0.5 = ( (49999 + 1) * (999 + 1) )/100M
+- 490ms timer: 0.490 = ( (49999 + 1) * (980 + 1) )/100M
+- 1s timer: 1 = ( (49999 + 1) * (1999 + 1) )/100M
     int internalLEDCount = 0;
     int externalLEDCount = 0;
     void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) { //handles global interrupt from timers
@@ -115,7 +113,6 @@
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     HAL_TIM_Base_Start_IT(&htim5);
 # Lab 3.4 UART Interrupt: check UART global interrupt in NVIC
-- Callbacks are declared outside main()
     char buffer[10];
     void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
         buffer[1] = '\0';
@@ -124,37 +121,13 @@
         if (buffer[0] == '\r') {
             HAL_UART_Transmit(&huart2, "\n", 1, 100);
         }
+        HAL_UART_Receive_IT(&huart2, buffer, 1)
     }
-    while (1) {
-        HAL_UART_Receive_IT(&huart2, buffer, 1); //it has _IT (non-blocking)
-    }
-# Lab 4.1 Timer increase brightness
-- 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M, PWM gen
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-    while (1) {
-        for(int i=0;i<100;i++) {
-            TIM2->CCR1 = i;
-            HAL_Delay(10);
-        }
-        for(int i=100;i>0;i--) {
-            TIM2->CCR1 = i;
-            HAL_Delay(10);
-        }
-    }
-# Lab 4.2 Adjust light from LDR
+    HAL_UART_Receive_IT(&huart2, buffer, 1); //it has _IT (non-blocking)
+    while (1) {}
+# Lab 4.3 Control LED with LDR
 - ioc > Analog > ADC1 > check IN0, PA0 = ADC1_IN0
 - LDR input:3.3v, output:GND,PA0
-    int ldrval = 0;
-    char buf[256];
-    while (1) {
-        HAL_ADC_Start(&hadc1);
-        if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
-            ldrval = HAL_ADC_GetValue(&hadc1);
-        sprintf (buf, "%d\r\n" , ldrval);
-        HAL_UART_Transmit(&huart2, buf, strlen(buf), 1000);
-        HAL_Delay(100);
-    }
-# Lab 4.3 Control LED with LDR
 - create ADC1_IN0 and timer
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     int adcval = 0;
@@ -192,39 +165,16 @@
 # Lab 5.2 Two SPIs communicating
 - SPI2 Transmit Only Master, SPI3 Receive Only Slave + global interrupt
 - SPI2 sends to SPI3 (wire MOSI(PC3, PC12), CLK(PB12, PB10) to resistor to each other)
-    void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
-        if(hspi == &hspi3) {
-            HAL_UART_Transmit(&huart2, "b", 1, 100);
-            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-        }
-    }
-    char c;
-    while (1) {
-        if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
-            HAL_SPI_Transmit(&hspi2, "a", 1, 100);
-            HAL_Delay(50);
-            HAL_SPI_Receive_IT(&hspi3, &c, 1); //must be _IT (interrupt)
-            while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
-        }
-    }
+    void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) { if(hspi == &hspi3) }
+            
+    HAL_SPI_Transmit(&hspi2, "a", 1, 100);
+    HAL_SPI_Receive_IT(&hspi3, &c, 1); //must be _IT (interrupt)
 # Lab 5.3 Two I2Cs communicating
 1. I2C1 event, error interrupt
 - GPIO > I2C > both I2C1_SDA, I2C1_SCL GPIO Pull-up
 2. I2C2 no need to customize, it is master
 3. I2C2 sends to I2C1 (wire SDA(PB9, PB7), SCL(PB6, PB10) to resistor to each other)
-    void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-        if(hi2c == &hi2c1) {
-            HAL_UART_Transmit(&huart2, "b", 1, 100);
-            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-        }
-    }
-    char c;
-    while (1) {
-        if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {
-            HAL_UART_Transmit(&huart2, "a", 1, 100);
-            HAL_I2C_Master_Transmit(&hi2c2, 0, "a", 1, 100);
-            HAL_Delay(50);
-            HAL_I2C_Slave_Receive_IT(&hi2c1, &c, 1); //must be _IT (interrupt)
-            while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) {}
-        }
-    }
+    void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c) { if(hi2c == &hi2c1) }
+    
+    HAL_I2C_Master_Transmit(&hi2c2, 0, "a", 1, 100);
+    HAL_I2C_Slave_Receive_IT(&hi2c1, &c, 1); //must be _IT (interrupt)
