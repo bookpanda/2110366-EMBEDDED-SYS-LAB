@@ -129,7 +129,10 @@
 - 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M, PWM gen
 - 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M
 - Timer 2 CH1 PWM gen (it will change A5 from GPIO_Output to TIM2_CH1)
-- Prescaler=1 for very frequent flicker = constant lit for human eyes
+- Prescaler=1 =very short period, very frequent flicker = constant lit for human eyes
+- pulse=how long should rising edge remain 1 per cycle/period
+- if counter period=999, pulse=499, LED is 50% lit because it is 50% high per cycle
+- CCR1 = pulse
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     while (1) {
         for(int i=0;i<100;i++) {
