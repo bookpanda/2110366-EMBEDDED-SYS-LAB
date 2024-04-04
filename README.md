@@ -190,6 +190,9 @@
 
 # Lab 4.1 Timer increase brightness
 - 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M, PWM gen
+- 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M
+- Timer 2 CH1 PWM gen (it will change A5 from GPIO_Output to TIM2_CH1)
+- Prescaler=1 for very frequent flicker = constant lit for human eyes
     ```c
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     while (1) {

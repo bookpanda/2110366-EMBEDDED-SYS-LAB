@@ -125,6 +125,22 @@
     }
     HAL_UART_Receive_IT(&huart2, buffer, 1); //it has _IT (non-blocking)
     while (1) {}
+# Lab 4.1 Timer increase brightness
+- 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M, PWM gen
+- 100us timer: 0.0001 = ( (1 + 1) * (399 + 1) )/8M
+- Timer 2 CH1 PWM gen (it will change A5 from GPIO_Output to TIM2_CH1)
+- Prescaler=1 for very frequent flicker = constant lit for human eyes
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    while (1) {
+        for(int i=0;i<100;i++) {
+            TIM2->CCR1 = i;
+            HAL_Delay(10);
+        }
+        for(int i=100;i>0;i--) {
+            TIM2->CCR1 = i;
+            HAL_Delay(10);
+        }
+    }
 # Lab 4.3 Control LED with LDR
 - ioc > Analog > ADC1 > check IN0, PA0 = ADC1_IN0
 - LDR input:3.3v, output:GND,PA0
