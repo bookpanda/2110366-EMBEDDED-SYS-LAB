@@ -39,9 +39,9 @@ Connect the MQ-3 Alcohol sensor to the NUCLEO-F411RE as follows (left is MQ-3, r
     ```
 
 ## Measurements
-Around 2700-2800 is the threshold for detecting alcohol.
+Around 2700-2800 is the threshold for triggering green alarm on alcohol sensor.
 - Ambient air: 600-700
 - Normal breath: 600-700
-- Intoxicated breath: 
+- Beer breath: 1300-1400 (immediate), 1000-1200 (after 1-2 mins)
 - Put next to open alcohol spray bottle: 1300-2500
 - After spraying alcohol on the sensor: 2700-3000
