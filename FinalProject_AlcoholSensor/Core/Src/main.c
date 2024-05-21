@@ -101,6 +101,8 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   char line[100];
+  int alcoholThreshold = 1300;
+  int alcoholState = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,6 +114,13 @@ int main(void)
 		  int alcoholLevel = HAL_ADC_GetValue(&hadc1);
 		  int tick = HAL_GetTick();
 		  sprintf(line, "Time: %d, Alcohol: %d", tick, alcoholLevel);
+		  if(alcoholLevel > alcoholThreshold) {
+			  if(alcoholState == 0) uartPrintln("1");
+			  alcoholState = 1;
+		  } else {
+			  if(alcoholState == 1) uartPrintln("0");
+			  alcoholState = 0;
+		  }
 		  uartPrintln(line);
 
 	  }
