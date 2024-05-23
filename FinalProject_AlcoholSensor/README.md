@@ -6,6 +6,7 @@ Connect the MQ-3 Alcohol sensor to the NUCLEO-F411RE as follows (left is MQ-3, r
 - GND -> GND
 - A0 (analog) -> A0
 - D0 (digital) no need for this one
+Port A1 is for sending current, 1 = alcohol exceeds threshold, 0 = alcohol is below threshold.
 
 ## Setup
 - ioc > Analog > ADC1 > check IN0 (PA0 aka A0 on the board now is ADC1_IN0)
