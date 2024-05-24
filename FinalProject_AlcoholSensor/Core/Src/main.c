@@ -118,7 +118,7 @@ int main(void)
 			  if(alcoholState == 0) {
 				  uartPrintln("Entering state 1");
 				  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
-				  HAL_Delay(200);
+				  HAL_Delay(5000);
 				  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
 			  }
 			  alcoholState = 1;
